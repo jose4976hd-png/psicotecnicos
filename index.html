@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Psicotécnicos Oposiciones | 3 Simulacros Definitivos</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: system-ui, 'Segoe UI', 'Roboto', 'Helvetica Neue', sans-serif;
+        }
+        body {
+            background: #f0f2f5;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+        .header {
+            background: white;
+            border-radius: 1.5rem;
+            padding: 1rem 1.8rem;
+            margin-bottom: 1.8rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+        }
+        h1 {
+            font-size: 1.7rem;
+            margin: 0;
+            color: #1e3c72;
+        }
+        .level-buttons {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .level-btn {
+            background: #eef2ff;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 40px;
+            font-weight: bold;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.2s;
+            color: #1e3c72;
+        }
+        .level-btn.active {
+            background: #1e3c72;
+            color: white;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+        .timer-box {
+            background: #1e293b;
+            color: white;
+            padding: 8px 18px;
+            border-radius: 60px;
+            font-family: monospace;
+            font-size: 1.5rem;
+            font-weight: bold;
+            letter-spacing: 2px;
+        }
+        .quiz-panel {
+            background: white;
+            border-radius: 1.8rem;
+            box-shadow: 0 12px 30px rgba(0,0,0,0.1);
+            overflow: hidden;
+            padding: 1.5rem;
+        }
+        .question-card {
+            margin-bottom: 1.8rem;
+            border-bottom: 1px solid #e2e8f0;
+            padding-bottom: 1.2rem;
+        }
+        .question-text {
+            font-weight: 600;
+            font-size: 1.05rem;
+            margin-bottom: 0.75rem;
+            color: #0f172a;
+        }
+        .options {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-left: 1rem;
+        }
+        .option-label {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            background: #f8fafc;
+            padding: 6px 14px;
+            border-radius: 40px;
+            border: 1px solid #cbd5e1;
+            transition: 0.1s;
+        }
+        .option-label.selected {
+            background: #1e3c72;
+            border-color: #1e3c72;
+            color: white;
+        }
+        input[type="radio"], input[type="text"] {
+            cursor: pointer;
+        }
+        .free-text {
+            margin-left: 1rem;
+            padding: 8px 12px;
+            border-radius: 30px;
+            border: 1px solid #cbd5e1;
+            width: 220px;
+            max-width: 90%;
+        }
+        .action-bar {
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin: 2rem 0 1rem;
+        }
+        button {
+            background: #1e3c72;
+            border: none;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 40px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+            font-size: 0.9rem;
+        }
+        button.reset-btn {
+            background: #475569;
+        }
+        button.correction-btn {
+            background: #2c6e2f;
+        }
+        button:hover {
+            filter: brightness(1.05);
+            transform: scale(0.98);
+        }
+        .results {
+            background: #e6f7e6;
+            padding: 1.2rem;
+            border-radius: 1.2rem;
+            margin-top: 1.5rem;
+            font-weight: bold;
+        }
+        footer {
+            text-align: center;
+            margin-top: 2rem;
+            color: #4b5563;
+            font-size: 0.8rem;
+        }
+        @media (max-width: 700px) {
+            .options {
+                flex-direction: column;
+                gap: 8px;
+            }
+            .free-text {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1>🧠 Psicotécnicos Oposición</h1>
+        <div class="level-buttons">
+            <button class="level-btn" data-level="massive">📚 Bloque Masivo</button>
+            <button class="level-btn" data-level="real">🎯 Simulacro Real</button>
+            <button class="level-btn" data-level="elite">⚡ Nivel Élite</button>
+        </div>
+        <div class="timer-box">⏱️ <span id="timerDisplay">00:00</span></div>
+    </div>
+
+    <div class="quiz-panel" id="quizPanel">
+        <div id="questionsContainer"></div>
+        <div class="action-bar">
+            <button id="checkBtn" class="correction-btn">✅ Corregir examen</button>
+            <button id="resetBtn" class="reset-btn">🔄 Reiniciar respuestas</button>
+        </div>
+        <div id="resultArea"></div>
+    </div>
+    <footer>Corrección inteligente: acepta variantes en mayúsculas, tildes, formatos numéricos.</footer>
+</div>
+
+<script>
+    // --------------------------------------------------------------
+    // BLOQUE MASIVO (44 preguntas originales)
+    // --------------------------------------------------------------
+    const massiveQuestions = [
+        { text: "3 – 6 – 12 – 24 – ?", type: "num", answer: "48", flex: true },
+        { text: "5 – 9 – 17 – 33 – ?", type: "num", answer: "65", flex: true },
+        { text: "81 – 27 – 9 – 3 – ?", type: "num", answer: "1", flex: true },
+        { text: "2 – 5 – 11 – 23 – 47 – ?", type: "num", answer: "95", flex: true },
+        { text: "7 – 14 – 13 – 26 – 25 – ?", type: "num", answer: "50", flex: true },
+        { text: "1 – 4 – 9 – 16 – 25 – ?", type: "num", answer: "36", flex: true },
+        { text: "120 – 60 – 30 – 15 – ?", type: "num", answer: "7.5", flex: true },
+        { text: "4 – 6 – 9 – 13 – 18 – ?", type: "num", answer: "24", flex: true },
+        { text: "11 – 22 – 21 – 42 – 41 – ?", type: "num", answer: "82", flex: true },
+        { text: "2 – 3 – 5 – 8 – 13 – ?", type: "num", answer: "21", flex: true },
+        { text: "A – C – F – J – ?", type: "text", answer: "O", flex: true },
+        { text: "Z – X – U – Q – ?", type: "text", answer: "L", flex: true },
+        { text: "B – E – H – K – ?", type: "text", answer: "N", flex: true },
+        { text: "A – D – J – S – ?", type: "text", answer: "G", flex: true },
+        { text: "M – N – P – S – ?", type: "text", answer: "W", flex: true },
+        { text: "Todos los mecánicos usan herramientas. José usa herramientas. ¿José es mecánico?", type: "choice", answer: "c", options: ["a) Sí", "b) No", "c) No se puede saber"] },
+        { text: "Si hoy es lunes, ¿qué día será dentro de 100 días?", type: "text", answer: "Miércoles", flex: true },
+        { text: "Un tren tarda 3 horas en recorrer 180 km. Velocidad media (km/h)", type: "num", answer: "60", flex: true },
+        { text: "Algunos A son B. Todos los B son C. Entonces:", type: "choice", answer: "a", options: ["a) Algunos A son C", "b) Todos A son C", "c) Ninguno"] },
+        { text: "Motor es a coche como corazón es a __.", type: "text", answer: "Cuerpo", flex: true },
+        { text: "Si giras un objeto 90° a la derecha dos veces, queda:", type: "choice", answer: "c", options: ["a) Igual", "b) Invertido", "c) 180° girado"] },
+        { text: "Cubo pintado por fuera se corta en 27 cubitos. ¿Cuántos tienen solo una cara pintada?", type: "num", answer: "6", flex: true },
+        { text: "Doblas un papel 3 veces y haces un agujero. ¿Cuántos agujeros?", type: "num", answer: "8", flex: true },
+        { text: "Un trabajador tarda 6h, dos iguales tardarán (h):", type: "num", answer: "3", flex: true },
+        { text: "20% descuento -> 80€, precio original:", type: "num", answer: "100", flex: true },
+        { text: "Depósito se llena en 4 h y se vacía en 8 h. Con ambos abiertos, ¿qué ocurre?", type: "text", answer: "8 horas", flex: true },
+        { text: "15 máquinas hacen 15 piezas en 15 min. ¿30 máquinas en 30 min?", type: "num", answer: "30", flex: true },
+        { text: "Incrementar 200 en un 15% =", type: "num", answer: "230", flex: true },
+        { text: "Cuenta R en frase: TRABAJAR RESULTA REALMENTE RENTABLE PORQUE REQUIERE RESPONSABILIDAD REAL (número)", type: "num", answer: "10", flex: true },
+        { text: "¿Cuál es diferente? PERA, MANZANA, PLÁTANO, ZAPATO, NARANJA", type: "choice", answer: "ZAPATO", options: ["PERA", "MANZANA", "PLÁTANO", "ZAPATO", "NARANJA"] },
+        { text: "Detecta el error: EL MECÁNICO REVISÓ... EL MECÁNICO REVISO EL MOTOR", type: "text", answer: "reviso", flex: true },
+        { text: "INMINENTE (sinónimo)", type: "choice", answer: "b", options: ["a) Lejano", "b) Próximo", "c) Difícil"] },
+        { text: "EFICAZ (sinónimo)", type: "choice", answer: "b", options: ["a) Ineficiente", "b) Productivo", "c) Complejo"] },
+        { text: "VIGILAR (sinónimo)", type: "choice", answer: "a", options: ["a) Observar", "b) Ignorar", "c) Destruir"] },
+        { text: "ESCASO (antónimo)", type: "choice", answer: "a", options: ["a) Abundante", "b) Rápido", "c) Ligero"] },
+        { text: "FLEXIBLE (antónimo)", type: "choice", answer: "a", options: ["a) Rígido", "b) Blando", "c) Suave"] },
+        { text: "A trabaja más rápido que B. C más lento que B. ¿Quién es el más rápido?", type: "text", answer: "A", flex: true },
+        { text: "Juan delante de Pedro, Pedro delante de Luis. ¿Quién está el último?", type: "text", answer: "Luis", flex: true },
+        { text: "Reloj adelanta 5 min/h. Tras 6h reales, ¿cuánto adelanta? (minutos)", type: "num", answer: "30", flex: true },
+        { text: "3 – 4 – 6 – 9 – 13 – ?", type: "num", answer: "18", flex: true },
+        { text: "2 – 6 – 7 – 21 – 22 – ?", type: "num", answer: "66", flex: true },
+        { text: "100 – 95 – 85 – 70 – 50 – ?", type: "num", answer: "25", flex: true },
+        { text: "Aumentar diámetro polea motriz:", type: "choice", answer: "a", options: ["a) Aumenta velocidad salida", "b) Disminuye velocidad salida", "c) No cambia"] },
+        { text: "Mayor brazo de palanca implica:", type: "choice", answer: "b", options: ["a) Más fuerza necesaria", "b) Menos fuerza necesaria", "c) Igual fuerza"] },
+        { text: "Un engranaje gira horario. El siguiente engranaje gira:", type: "text", answer: "antihorario", flex: true }
+    ];
+
+    // --------------------------------------------------------------
+    // SIMULACRO REAL (40 preguntas)
+    // --------------------------------------------------------------
+    const realQuestions = [
+        { text: "4 – 8 – 16 – 32 – ?", type: "num", answer: "64", flex: true },
+        { text: "5 – 7 – 11 – 19 – 35 – ?", type: "num", answer: "67", flex: true },
+        { text: "90 – 45 – 15 – 5 – ?", type: "text", answer: "5/3", flex: true },
+        { text: "2 – 6 – 7 – 21 – 22 – ?", type: "num", answer: "66", flex: true },
+        { text: "1 – 1 – 2 – 3 – 5 – 8 – ?", type: "num", answer: "13", flex: true },
+        { text: "6 – 9 – 15 – 24 – 39 – ?", type: "num", answer: "63", flex: true },
+        { text: "100 – 90 – 72 – 46 – ?", type: "num", answer: "12", flex: true },
+        { text: "3 – 12 – 48 – 192 – ?", type: "num", answer: "768", flex: true },
+        { text: "14 – 18 – 17 – 21 – 20 – ?", type: "num", answer: "24", flex: true },
+        { text: "81 – 64 – 49 – 36 – ?", type: "num", answer: "25", flex: true },
+        { text: "A – C – F – J – O – ?", type: "text", answer: "U", flex: true },
+        { text: "Z – W – S – N – ?", type: "text", answer: "H", flex: true },
+        { text: "B – D – G – K – P – ?", type: "text", answer: "V", flex: true },
+        { text: "M – O – R – V – ?", type: "text", answer: "A", flex: true },
+        { text: "C – F – L – X – ?", type: "text", answer: "V", flex: true },
+        { text: "Todos los técnicos revisan equipos. Algunos revisores son técnicos. Conclusión:", type: "choice", answer: "b", options: ["a) Todos los revisores revisan equipos", "b) Algunos revisores revisan equipos", "c) Ninguno"] },
+        { text: "Si ayer fue domingo, pasado mañana será:", type: "choice", answer: "Martes", options: ["Martes", "Miércoles", "Jueves"] },
+        { text: "Coche 240 km en 3h, velocidad media (km/h):", type: "num", answer: "80", flex: true },
+        { text: "Ningún A es B, algunos B son C =>", type: "choice", answer: "c", options: ["a) Algunos A son C", "b) Ningún A es C", "c) No se puede saber"] },
+        { text: "Mano es a guante como pie es a:", type: "text", answer: "Zapato", flex: true },
+        { text: "Un trabajador hace un trabajo en 5h. 5 trabajadores iguales tardan (h):", type: "num", answer: "1", flex: true },
+        { text: "Precio tras 25% descuento = 75€. Precio original:", type: "num", answer: "100", flex: true },
+        { text: "Depósito se llena en 6h, otro en 3h. Ambos juntos (h):", type: "num", answer: "2", flex: true },
+        { text: "20 máquinas producen 20 piezas en 20 min. 40 máquinas en 40 min producen:", type: "num", answer: "40", flex: true },
+        { text: "Aumentar 400 un 10% =", type: "num", answer: "440", flex: true },
+        { text: "Cuenta cuántas E hay: EL JEFE ENTREGA ELEMENTOS ESENCIALES EN ESTE EJERCICIO ESPECIAL", type: "num", answer: "15", flex: true },
+        { text: "¿Cuál sobra? PERRO, GATO, CABALLO, SILLA, VACA", type: "choice", answer: "SILLA", options: ["PERRO", "GATO", "CABALLO", "SILLA", "VACA"] },
+        { text: "Detecta el error: LA MAQUINA FUNCIONA BIEN (fila repetida)", type: "text", answer: "MAQUINA", flex: true },
+        { text: "Girar un objeto 3 veces 90° derecha equivale a:", type: "choice", answer: "a", options: ["a) 90° izquierda", "b) 180°", "c) Igual posición"] },
+        { text: "Cubo pintado por fuera dividido en 64 cubitos. ¿Cuántos tienen 3 caras pintadas?", type: "num", answer: "8", flex: true },
+        { text: "Doblas papel 2 veces y perforas una vez. Agujeros finales:", type: "num", answer: "4", flex: true },
+        { text: "PRECISO (sinónimo)", type: "choice", answer: "a", options: ["a) Exacto", "b) Largo", "c) Lento"] },
+        { text: "OPTIMIZAR (sinónimo)", type: "choice", answer: "a", options: ["a) Mejorar", "b) Empeorar", "c) Repetir"] },
+        { text: "CONSTANTE (sinónimo)", type: "choice", answer: "b", options: ["a) Variable", "b) Persistente", "c) Débil"] },
+        { text: "COMPLEJO (antónimo)", type: "choice", answer: "a", options: ["a) Simple", "b) Rápido", "c) Amplio"] },
+        { text: "EXPANDIR (antónimo)", type: "choice", answer: "a", options: ["a) Reducir", "b) Crear", "c) Salir"] },
+        { text: "A es mayor que B, B es mayor que C, C es mayor que D. El menor es:", type: "text", answer: "D", flex: true },
+        { text: "Ana delante de Luis, Luis delante de Marta, Marta delante de Pedro. ¿Quién va primero?", type: "text", answer: "Ana", flex: true },
+        { text: "Un reloj adelanta 4 min cada hora. Tras 5 horas reales adelantará (min):", type: "num", answer: "20", flex: true },
+        { text: "Aumentar longitud de palanca:", type: "choice", answer: "a", options: ["a) Reduce fuerza necesaria", "b) Aumenta fuerza", "c) No cambia"] },
+        { text: "Dos engranajes en contacto giran en sentido:", type: "choice", answer: "b", options: ["a) Igual sentido", "b) Sentido contrario", "c) Aleatorio"] }
+    ];
+
+    // --------------------------------------------------------------
+    // NIVEL ÉLITE (30 preguntas originales)
+    // --------------------------------------------------------------
+    const eliteQuestions = [
+        { text: "1 – 4 – 5 – 9 – 14 – 23 – ?", type: "num", answer: "37", flex: true },
+        { text: "2 – 3 – 6 – 7 – 14 – 15 – ?", type: "num", answer: "28", flex: true },
+        { text: "8 – 6 – 9 – 7 – 10 – 8 – ?", type: "num", answer: "11", flex: true },
+        { text: "1 – 3 – 12 – 60 – ?", type: "num", answer: "360", flex: true },
+        { text: "4 – 5 – 7 – 11 – 19 – ?", type: "num", answer: "31", flex: true },
+        { text: "100 – 50 – 52 – 26 – 28 – ?", type: "num", answer: "14", flex: true },
+        { text: "3 – 9 – 27 – 81 – ?", type: "num", answer: "243", flex: true },
+        { text: "1 – 2 – 6 – 24 – 120 – ?", type: "num", answer: "720", flex: true },
+        { text: "15 – 14 – 12 – 9 – 5 – ?", type: "num", answer: "0", flex: true },
+        { text: "7 – 10 – 8 – 11 – 9 – 12 – ?", type: "num", answer: "13", flex: true },
+        { text: "2 – 5 – 4 – 7 – 6 – 9 – ?", type: "num", answer: "8", flex: true },
+        { text: "1 – 11 – 21 – 1211 – 111221 – ?", type: "text", answer: "312211", flex: true },
+        { text: "9 – 3 – 1 – 1/3 – ?", type: "text", answer: "1/9", flex: true },
+        { text: "5 – 10 – 9 – 18 – 17 – ?", type: "num", answer: "34", flex: true },
+        { text: "3 – 6 – 5 – 10 – 9 – ?", type: "num", answer: "18", flex: true },
+        { text: "Todos los A son B. Ningún B es C. Entonces:", type: "choice", answer: "a", options: ["a) Ningún A es C", "b) Algunos A son C", "c) No se puede saber"] },
+        { text: "Si hoy no es lunes ni martes ni miércoles, mañana tampoco será viernes. ¿Qué día es hoy?", type: "text", answer: "Jueves", flex: true },
+        { text: "Un tren de 120 m tarda 6 s en pasar un poste. Velocidad (m/s):", type: "num", answer: "20", flex: true },
+        { text: "Cinco interruptores, cinco bombillas, solo puedes entrar una vez. ¿Cómo identificas cada interruptor?", type: "text", answer: "calor", flex: true },
+        { text: "Algunos técnicos son ingenieros. Ningún ingeniero es administrativo. Entonces:", type: "choice", answer: "a", options: ["a) Algunos técnicos no son administrativos", "b) Todos técnicos son administrativos", "c) No se puede saber"] },
+        { text: "Cuenta las A: LA MAQUINARIA AVANZA HACIA LA AUTOMATIZACION AUNQUE ALGUNAS AREAS AUN ANALIZAN ALTERNATIVAS", type: "num", answer: "9", flex: true },
+        { text: "Palabra distinta: TORNILLO, TUERCA, ARANDELA, MOTOR, PASADOR", type: "text", answer: "MOTOR", flex: true },
+        { text: "Detecta el error: EL TECNICO ANALIZO EL SISTEMA (en las tres líneas)", type: "text", answer: "ANALIZO", flex: true },
+        { text: "Cubo pintado se divide en 125 cubitos. ¿Cuántos tienen 2 caras pintadas?", type: "num", answer: "54", flex: true },
+        { text: "Girar 270° izquierda equivale a:", type: "choice", answer: "a", options: ["a) 90° derecha", "b) 180°", "c) Igual posición"] },
+        { text: "Doblas papel 4 veces y perforas una vez. Agujeros finales:", type: "num", answer: "16", flex: true },
+        { text: "Engranaje A gira horario → B → C. Sentido de C:", type: "text", answer: "antihorario", flex: true },
+        { text: "Aumentar diámetro de la polea conducida:", type: "choice", answer: "b", options: ["a) Más velocidad", "b) Menos velocidad", "c) Igual"] },
+        { text: "Mayor presión hidráulica implica:", type: "choice", answer: "a", options: ["a) Más fuerza", "b) Menos fuerza", "c) No cambia"] },
+        { text: "10 obreros → 10 días → 10 piezas. 5 obreros → 5 días → ?", type: "num", answer: "5", flex: true },
+        { text: "Subir 300 un 20% y luego bajar 20% =", type: "num", answer: "288", flex: true }
+    ];
+
+    let currentLevel = "massive";
+    let userAnswers = {};
+    let timerInterval = null;
+    let secondsLeft = 0;
+    let maxSeconds = 0;
+
+    const levelMap = {
+        massive: { name: "Masivo", questions: massiveQuestions, timeSec: 40*60 },
+        real: { name: "Real", questions: realQuestions, timeSec: 30*60 },
+        elite: { name: "Élite", questions: eliteQuestions, timeSec: 20*60 }
+    };
+
+    // --------------------------------------------------------------
+    // FUNCIÓN DE COMPARACIÓN INTELIGENTE
+    // --------------------------------------------------------------
+    function isAnswerCorrect(userAns, correctAns, type, flex = true) {
+        if (!userAns || userAns.trim() === "") return false;
+        userAns = userAns.toString().trim().toLowerCase();
+        let correct = correctAns.toString().trim().toLowerCase();
+
+        // Para numéricos, convertir ambos a número si es posible
+        if (type === "num") {
+            let numUser = parseFloat(userAns.replace(',', '.'));
+            let numCorrect = parseFloat(correct);
+            if (!isNaN(numUser) && !isNaN(numCorrect)) {
+                return Math.abs(numUser - numCorrect) < 0.001;
+            }
+            // Si no son números, comparación flexible de string
+        }
+
+        // Para choice, la respuesta esperada puede ser letra o texto
+        if (type === "choice") {
+            // si correct es una letra suelta (a, b, c...)
+            if (correct.length === 1 && /[a-z]/.test(correct)) {
+                // el usuario puede haber respondido "a) texto" o solo "a"
+                if (userAns === correct) return true;
+                if (userAns.startsWith(correct + ")")) return true;
+                if (userAns.startsWith(correct + " ")) return true;
+                return false;
+            } else {
+                // comparación directa
+                return userAns === correct;
+            }
+        }
+
+        // Para texto libre, eliminamos tildes y espacios
+        const normalize = (s) => {
+            return s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^\w\d]/g, "");
+        };
+        let userNorm = normalize(userAns);
+        let correctNorm = normalize(correct);
+        if (userNorm === correctNorm) return true;
+
+        // Casos especiales comunes
+        if (correct === "antihorario" && (userAns === "contrario" || userAns === "sentido contrario")) return true;
+        if (correct === "reviso" && (userAns.includes("reviso") || userAns.includes("tilde"))) return true;
+        if (correct === "maquina" && userAns.includes("maquina")) return true;
+        if (correct === "analizo" && userAns.includes("analizo")) return true;
+        if (correct === "calor" && (userAns.includes("calor") || userAns.includes("interruptor"))) return true;
+        if (correct === "8 horas" && (userAns.includes("8") && (userAns.includes("hora") || userAns.includes("h")))) return true;
+        if (correct === "jueves" && userAns === "jueves") return true;
+        if (correct === "miércoles" && (userAns === "miercoles" || userAns === "miércoles")) return true;
+
+        return false;
+    }
+
+    function stopTimer() {
+        if (timerInterval) {
+            clearInterval(timerInterval);
+            timerInterval = null;
+        }
+    }
+
+    function startTimer(seconds) {
+        stopTimer();
+        secondsLeft = seconds;
+        updateTimerDisplay();
+        timerInterval = setInterval(() => {
+            if (secondsLeft <= 0) {
+                stopTimer();
+                alert("⏰ TIEMPO FINALIZADO. Corrige tus respuestas.");
+            } else {
+                secondsLeft--;
+                updateTimerDisplay();
+            }
+        }, 1000);
+    }
+
+    function updateTimerDisplay() {
+        let mins = Math.floor(secondsLeft / 60);
+        let secs = secondsLeft % 60;
+        document.getElementById("timerDisplay").innerText = `${mins.toString().padStart(2,'0')}:${secs.toString().padStart(2,'0')}`;
+    }
+
+    function renderQuestions() {
+        const questions = levelMap[currentLevel].questions;
+        const container = document.getElementById("questionsContainer");
+        container.innerHTML = "";
+        userAnswers = {};
+        questions.forEach((q, idx) => {
+            const qDiv = document.createElement("div");
+            qDiv.className = "question-card";
+            qDiv.innerHTML = `<div class="question-text">${idx+1}. ${q.text}</div>`;
+            const optionsDiv = document.createElement("div");
+            optionsDiv.className = "options";
+            if (q.type === "choice") {
+                q.options.forEach(opt => {
+                    const label = document.createElement("label");
+                    label.className = "option-label";
+                    const radio = document.createElement("input");
+                    radio.type = "radio";
+                    radio.name = `q${idx}`;
+                    radio.value = opt;
+                    radio.addEventListener("change", (e) => {
+                        if(e.target.checked) userAnswers[idx] = opt;
+                        // Quitar selected de otros labels del mismo grupo
+                        document.querySelectorAll(`input[name='q${idx}']`).forEach(rb => {
+                            rb.closest('.option-label')?.classList.remove('selected');
+                        });
+                        label.classList.add("selected");
+                    });
+                    label.appendChild(radio);
+                    label.appendChild(document.createTextNode(opt));
+                    optionsDiv.appendChild(label);
+                });
+            } else {
+                const input = document.createElement("input");
+                input.type = "text";
+                input.placeholder = "Escribe tu respuesta";
+                input.className = "free-text";
+                input.addEventListener("input", (e) => { userAnswers[idx] = e.target.value.trim(); });
+                optionsDiv.appendChild(input);
+            }
+            qDiv.appendChild(optionsDiv);
+            container.appendChild(qDiv);
+        });
+        userAnswers = {};
+        stopTimer();
+        startTimer(maxSeconds);
+    }
+
+    function correctExam() {
+        const questions = levelMap[currentLevel].questions;
+        let correct = 0;
+        let total = questions.length;
+        let details = [];
+        for (let i = 0; i < total; i++) {
+            const q = questions[i];
+            const userAns = userAnswers[i];
+            let isCorrect = false;
+            if (userAns !== undefined && userAns !== "") {
+                isCorrect = isAnswerCorrect(userAns, q.answer, q.type, q.flex);
+            }
+            if (isCorrect) correct++;
+            let status = isCorrect ? "✅" : "❌";
+            let correctShow = q.answer;
+            details.push(`${i+1}: ${status} (Correcta: ${correctShow})`);
+        }
+        const percent = Math.round((correct/total)*100);
+        let msg = `📊 Resultado ${levelMap[currentLevel].name}: ${correct}/${total} (${percent}%)\n`;
+        if (currentLevel === 'real') msg += `Corte orientativo: 28-30 | Tu nivel: ${correct>=28?"🟢 Aprobado fuerte":correct>=24?"🟡 Zona corte":"🔴 Necesitas práctica"}`;
+        else if (currentLevel === 'elite') msg += `Nivel élite: ${correct>=28?"🔥 Muy competitivo":correct>=24?"🟢 Apto con entrenamiento":"🟠 Mejorable"}`;
+        else msg += `Masivo: ${correct>=38?"Excelente":correct>=32?"Buen nivel":"Sigue practicando"}`;
+        document.getElementById("resultArea").innerHTML = `<div class="results">${msg.replace(/\n/g,"<br>")}<br><br><details><summary>📋 Ver corrección detallada</summary>${details.join("<br>")}</details></div>`;
+    }
+
+    function resetAnswers() {
+        userAnswers = {};
+        // Limpiar inputs y radios
+        document.querySelectorAll(".free-text").forEach(inp => inp.value = "");
+        document.querySelectorAll("input[type='radio']").forEach(radio => {
+            radio.checked = false;
+            radio.closest('.option-label')?.classList.remove('selected');
+        });
+        document.getElementById("resultArea").innerHTML = "";
+        // Reiniciar temporizador (opcional: mantener tiempo)
+        stopTimer();
+        startTimer(maxSeconds);
+    }
+
+    function changeLevel(level) {
+        currentLevel = level;
+        maxSeconds = levelMap[level].timeSec;
+        renderQuestions();
+        document.getElementById("resultArea").innerHTML = "";
+        document.querySelectorAll(".level-btn").forEach(btn => {
+            if(btn.getAttribute("data-level") === level) btn.classList.add("active");
+            else btn.classList.remove("active");
+        });
+    }
+
+    // Eventos
+    document.getElementById("checkBtn").addEventListener("click", correctExam);
+    document.getElementById("resetBtn").addEventListener("click", resetAnswers);
+    document.querySelectorAll(".level-btn").forEach(btn => {
+        btn.addEventListener("click", (e) => {
+            changeLevel(e.target.getAttribute("data-level"));
+        });
+    });
+    changeLevel("massive");
+</script>
+</body>
+</html>
